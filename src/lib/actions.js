@@ -1,38 +1,48 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { createClient } from './supabase/server';
 
+/**
+ * একটি টেক্সটকে URL-ফ্রেন্ডলি স্ল্যাগে পরিণত করে।
+ * যেমন: "আমার বই ঘর" -> "আমার-বই-ঘর"
+ * @param {string} text - যে টেক্সটটিকে স্ল্যাগে পরিণত করতে হবে।
+ * @returns {string} - URL-ফ্রেন্ডলি স্ল্যাগ।
+ */
 function slugify(text) {
-    // ... (slugify ফাংশন অপরিবর্তিত)
+    if (!text) return '';
     return text
         .toString()
         .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^\w\-]+/g, '')
-        .replace(/\-\-+/g, '-')
-        .replace(/^-+/, '')
-        .replace(/-+$/, '');
+        .replace(/\s+/g, '-')           // স্পেসকে হাইফেন (-) দিয়ে পরিবর্তন করে
+        .replace(/[^\w\-]+/g, '')       // সকল নন-ওয়ার্ড ক্যারেক্টার (a-z, 0-9, _) এবং হাইফেন ছাড়া বাকি সব মুছে ফেলে
+        .replace(/\-\-+/g, '-')         // একাধিক হাইফেনকে একটি হাইফেনে পরিণত করে
+        .replace(/^-+/, '')             // শুরু থেকে হাইফেন মুছে ফেলে
+        .replace(/-+$/, '');            // শেষ থেকে হাইফেন মুছে ফেলে
 }
 
-// এখানে পরিবর্তন করা হয়েছে: ফাংশনটি এখন দুটি প্যারামিটার গ্রহণ করছে।
+/**
+ * একটি নতুন বইয়ের দোকান তৈরি করার জন্য সার্ভার অ্যাকশন।
+ * @param {object} previousState - useFormState থেকে আসা আগের স্টেট।
+ * @param {FormData} formData - ফর্ম থেকে আসা ডেটা।
+ * @returns {Promise<object>} - সফল বা ব্যর্থতার তথ্যসহ একটি অবজেক্ট।
+ */
 export async function createShop(previousState, formData) {
     const supabase = createClient();
 
+    // ১. ব্যবহারকারী লগইন করা আছে কি না চেক করুন
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         return { error: 'আপনাকে অবশ্যই লগইন করতে হবে।' };
     }
 
-    // এখন formData সঠিকভাবে FormData অবজেক্টকে নির্দেশ করছে।
+    // ২. ফর্ম থেকে দোকানের নাম নিন এবং ভ্যালিডেট করুন
     const shopName = formData.get('shopName')?.toString();
     if (!shopName || shopName.trim().length < 3) {
         return { error: 'দোকানের নাম কমপক্ষে ৩ অক্ষরের হতে হবে।' };
     }
 
-    const slug = slugify(shopName);
-
+    // ৩. ব্যবহারকারীর আগে থেকেই কোনো দোকান আছে কি না চেক করুন
     const { data: existingShop } = await supabase
         .from('shops')
         .select('id')
@@ -43,6 +53,8 @@ export async function createShop(previousState, formData) {
         return { error: 'আপনার ইতোমধ্যে একটি দোকান রয়েছে।' };
     }
 
+    // ৪. ডাটাবেসে নতুন দোকানটি যোগ করুন
+    const slug = slugify(shopName);
     const { data, error } = await supabase
         .from('shops')
         .insert({
@@ -53,7 +65,9 @@ export async function createShop(previousState, formData) {
         .select('slug')
         .single();
 
+    // ৫. সম্ভাব্য এরর হ্যান্ডেল করুন
     if (error) {
+        // যদি slug ইউনিক না হয় (unique_violation)
         if (error.code === '23505') {
             return { error: 'এই নামের দোকান ইতোমধ্যে ব্যবহৃত হয়েছে। অন্য নাম দিন।' };
         }
@@ -61,6 +75,10 @@ export async function createShop(previousState, formData) {
         return { error: 'দোকান তৈরিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।' };
     }
 
-    revalidatePath('/', 'layout');
-    redirect(`/shop/${data.slug}`);
+    // ৬. সফল হলে ক্যাশ রিভ্যালিডেট করুন এবং সফলতার তথ্য রিটার্ন করুন
+    revalidatePath('/', 'layout'); // লেআউট রিভ্যালিডেট করে "আমার দোকান" বাটন দেখানোর জন্য
+    revalidatePath(`/shop/${data.slug}`); // নতুন দোকানের পেজের ক্যাশ রিভ্যালিডেট করার জন্য
+
+    // ক্লায়েন্ট-সাইডে রিডাইরেক্ট করার জন্য সফলতার তথ্য এবং slug রিটার্ন করা হচ্ছে
+    return { success: true, slug: data.slug };
 }
