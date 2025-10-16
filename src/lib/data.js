@@ -110,7 +110,6 @@ export async function getShopBySlug(slug) {
         .single();
 
     if (error || !shop) {
-        // console.error(`Shop not found for slug: ${slug}`, error); // ডিবাগ করার জন্য এই লাইন ব্যবহার করতে পারেন
         return null;
     }
 
@@ -126,11 +125,13 @@ export async function getShopBySlug(slug) {
         return acc;
     }, {});
 
+    // সমাধান: এখানে allCategories প্রপার্টিটি যোগ করা হয়েছে
     return {
         id: shop.id,
         name: shop.name,
         slug: shop.slug,
         booksByCategory: booksByCategory,
         isOwner: user ? user.id === shop.owner_id : false,
+        allCategories: allCategories, // <-- এই লাইনটি যোগ করা হয়েছে
     };
 }

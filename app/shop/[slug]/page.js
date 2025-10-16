@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getShopBySlug } from "../../../src/lib/data";
 
+// BookCard কম্পোনেন্টটি অপরিবর্তিত থাকবে...
 function BookCard({ book, isOwner, shopSlug }) {
-    // ... এই কম্পোনেন্টটি আগের মতোই থাকবে ...
     return (
         <div className="card bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative flex flex-col">
             {isOwner && (
@@ -30,6 +30,7 @@ function BookCard({ book, isOwner, shopSlug }) {
     );
 }
 
+
 export default async function ShopPage({ params }) {
     const { slug } = params;
     const shop = await getShopBySlug(slug);
@@ -38,7 +39,8 @@ export default async function ShopPage({ params }) {
         notFound();
     }
 
-    const { name, booksByCategory, isOwner } = shop;
+    // এখানে shop অবজেক্ট থেকে isOwner, id, এবং allCategories বের করে আনা হচ্ছে
+    const { name, booksByCategory, isOwner, id, allCategories } = shop;
     const hasBooks = Object.keys(booksByCategory).length > 0;
 
     return (
@@ -54,18 +56,19 @@ export default async function ShopPage({ params }) {
                         href={{
                             pathname: `/shop/${slug}/add-book`,
                             query: {
-                                shopId: shopId,
-                                // ক্যাটাগরি তালিকাটিকে JSON স্ট্রিং-এ পরিণত করে পাঠানো হচ্ছে
+                                // সমাধান: এখানে shop.id ব্যবহার করা হয়েছে
+                                shopId: id,
                                 categories: JSON.stringify(allCategories)
                             }
                         }}
-                        className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700"
+                        className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-all duration-300 transform hover:scale-105"
                     >
                         + নতুন বই যোগ করুন
                     </Link>
                 </div>
             )}
 
+            {/* বাকি UI অপরিবর্তিত */}
             {!hasBooks ? (
                 <div className="text-center text-gray-500 py-16 bg-gray-50 rounded-lg">
                     <h3 className="text-2xl font-semibold text-gray-700">এখনো কোনো বই নেই</h3>
