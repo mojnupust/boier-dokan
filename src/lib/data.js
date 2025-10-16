@@ -94,54 +94,31 @@ export async function getAllCategories() {
     }
     return data;
 }
-/**
- * একটি slug ব্যবহার করে দোকানের বিস্তারিত তথ্য, বই এবং মালিকানার অবস্থা নিয়ে আসে।
- * @param {string} slug - দোকানের ইউনিক URL স্ল্যাগ।
- * @returns {Promise<object|null>} - দোকানের তথ্য অথবা null।
- */
+
 export async function getShopBySlug(slug) {
     noStore();
     const supabase = createClient();
-
-    // ১. বর্তমান ব্যবহারকারীর তথ্য আনা হচ্ছে
     const { data: { user } } = await supabase.auth.getUser();
 
-    // ২. শপের তথ্য এবং সম্পর্কিত বই ও ক্যাটাগরি জয়েন করে আনা হচ্ছে
     const { data: shop, error } = await supabase
         .from('shops')
         .select(`
-      id,
-      name,
-      slug,
-      owner_id,
-      categories (
-        id,
-        name,
-        slug
-      ),
-      books (
-        id,
-        title,
-        short_description,
-        image_url,
-        affiliate_url,
-        price,
-        category_id
-      )
+      id, name, slug, owner_id,
+      books ( id, title, short_description, image_url, affiliate_url, price, category_id )
     `)
         .eq('slug', slug)
         .single();
 
     if (error || !shop) {
-        console.error('Error fetching shop by slug:', error);
-        return null; // দোকান খুঁজে না পাওয়া গেলে null রিটার্ন হবে
+        // console.error(`Shop not found for slug: ${slug}`, error); // ডিবাগ করার জন্য এই লাইন ব্যবহার করতে পারেন
+        return null;
     }
 
-    // ৩. বইগুলোকে তাদের ক্যাটাগরি অনুযায়ী গ্রুপ করা হচ্ছে
-    const booksByCategory = shop.books.reduce((acc, book) => {
-        const category = shop.categories.find(cat => cat.id === book.category_id);
-        const categoryName = category ? category.name : 'Uncategorized';
+    const allCategories = await getAllCategories();
+    const categoryMap = new Map(allCategories.map(cat => [cat.id, cat.name]));
 
+    const booksByCategory = shop.books.reduce((acc, book) => {
+        const categoryName = categoryMap.get(book.category_id) || 'Uncategorized';
         if (!acc[categoryName]) {
             acc[categoryName] = [];
         }
@@ -149,13 +126,11 @@ export async function getShopBySlug(slug) {
         return acc;
     }, {});
 
-    // ৪. একটি সুন্দর ফরম্যাটে ডেটা রিটার্ন করা হচ্ছে
     return {
         id: shop.id,
         name: shop.name,
         slug: shop.slug,
         booksByCategory: booksByCategory,
-        // বর্তমান ব্যবহারকারী এই দোকানের মালিক কি না, তা চেক করা হচ্ছে
         isOwner: user ? user.id === shop.owner_id : false,
     };
 }

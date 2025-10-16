@@ -82,3 +82,69 @@ export async function createShop(previousState, formData) {
     // ক্লায়েন্ট-সাইডে রিডাইরেক্ট করার জন্য সফলতার তথ্য এবং slug রিটার্ন করা হচ্ছে
     return { success: true, slug: data.slug };
 }
+
+/**
+ * একটি দোকানে নতুন বই যোগ করার জন্য সার্ভার অ্যাকশন।
+ * @param {object} previousState - useFormState থেকে আসা স্টেট।
+ * @param {FormData} formData - ফর্ম থেকে আসা ডেটা।
+ * @returns {Promise<object>} - সফল বা ব্যর্থতার তথ্যসহ একটি অবজেক্ট।
+ */
+export async function addBookToShop(previousState, formData) {
+    const supabase = createClient();
+
+    // ১. ব্যবহারকারী লগইন করা আছে কি না চেক করুন
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { error: 'বই যোগ করার জন্য আপনাকে অবশ্যই লগইন করতে হবে।' };
+    }
+
+    // ২. ফর্ম থেকে ডেটা এবং লুকানো shopId ও slug সংগ্রহ করুন
+    const shopId = formData.get('shopId');
+    const shopSlug = formData.get('shopSlug');
+    const title = formData.get('title');
+    const categoryId = formData.get('categoryId');
+    const affiliateUrl = formData.get('affiliateUrl');
+    const imageUrl = formData.get('imageUrl');
+    const shortDescription = formData.get('shortDescription');
+    const price = formData.get('price');
+
+    // ৩. বেসিক ভ্যালিডেশন
+    if (!shopId || !shopSlug || !title || !categoryId || !affiliateUrl) {
+        return { error: 'টাইটেল, ক্যাটাগরি এবং এফিলিয়েট লিঙ্ক আবশ্যক।' };
+    }
+
+    // ৪. ব্যবহারকারী এই দোকানের মালিক কি না, তা পুনরায় সার্ভারে ভেরিফাই করুন
+    const { data: shop, error: shopError } = await supabase
+        .from('shops')
+        .select('id')
+        .eq('id', shopId)
+        .eq('owner_id', user.id)
+        .single();
+
+    if (shopError || !shop) {
+        return { error: 'এই দোকানে বই যোগ করার অনুমতি আপনার নেই।' };
+    }
+
+    // ৫. ডাটাবেসে নতুন বইটি যোগ করুন
+    const { error: bookError } = await supabase
+        .from('books')
+        .insert({
+            shop_id: shopId,
+            category_id: categoryId,
+            title: title,
+            affiliate_url: affiliateUrl,
+            image_url: imageUrl,
+            short_description: shortDescription,
+            price: price || null, // মূল্য না দিলে null হিসেবে সেভ হবে
+        });
+
+    if (bookError) {
+        console.error('Error adding book:', bookError);
+        return { error: 'বই যোগ করার সময় একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।' };
+    }
+
+    // ৬. ক্যাশ রিভ্যালিডেট করুন এবং সফলতার তথ্য রিটার্ন করুন
+    revalidatePath(`/shop/${shopSlug}`); // দোকানের পেজের ক্যাশ রিভ্যালিডেট করা হচ্ছে
+
+    return { success: true, slug: shopSlug };
+}
