@@ -135,3 +135,32 @@ export async function getShopBySlug(slug) {
         allCategories: allCategories, // <-- এই লাইনটি যোগ করা হয়েছে
     };
 }
+
+/**
+ * সম্পাদনা করার জন্য একটি নির্দিষ্ট বইয়ের ডেটা এবং মালিকানা যাচাই করে।
+ * @param {string} bookId - যে বইটি সম্পাদনা করা হবে তার UUID।
+ * @returns {Promise<object|null>} - বইয়ের ডেটা অথবা null।
+ */
+export async function getBookForEdit(bookId) {
+    noStore();
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return null; // লগইন না থাকলে null
+
+    const { data: book, error } = await supabase
+        .from('books')
+        .select(`
+      *,
+      shops ( owner_id )
+    `)
+        .eq('id', bookId)
+        .single();
+
+    // যদি বই না পাওয়া যায় বা ব্যবহারকারী মালিক না হন, তাহলে null রিটার্ন করুন
+    if (error || !book || book.shops.owner_id !== user.id) {
+        return null;
+    }
+
+    return book;
+}

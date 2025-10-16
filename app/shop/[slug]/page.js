@@ -1,47 +1,28 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getShopBySlug } from "../../../src/lib/data";
+import BookCard from "./BookCard"; // BookCard.js ফাইল থেকে কম্পোনেন্ট ইম্পোর্ট করা হচ্ছে
 
-// BookCard কম্পোনেন্টটি অপরিবর্তিত থাকবে...
-function BookCard({ book, isOwner, shopSlug }) {
-    return (
-        <div className="card bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative flex flex-col">
-            {isOwner && (
-                <div className="absolute top-2 right-2 z-10 flex space-x-2">
-                    <Link href={`/shop/${shopSlug}/edit/${book.id}`} className="px-2 py-1 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs font-semibold shadow-md">
-                        Edit
-                    </Link>
-                    <button className="px-2 py-1 bg-red-500 text-white rounded-full hover:bg-red-600 text-xs font-semibold shadow-md">
-                        Del
-                    </button>
-                </div>
-            )}
-            <div className="relative h-56 w-full">
-                <img src={book.image_url || 'https://via.placeholder.com/300x400.png?text=Boier+Dokan'} alt={book.title} className="w-full h-full object-cover" />
-            </div>
-            <div className="p-4 flex flex-col flex-grow">
-                <h3 className="font-bold text-lg truncate flex-grow-0">{book.title}</h3>
-                <p className="text-gray-600 text-sm mt-1 h-10 overflow-hidden flex-grow">{book.short_description || 'No description'}</p>
-                <a href={book.affiliate_url} target="_blank" rel="noopener noreferrer" className="mt-4 w-full inline-block text-center bg-gray-800 text-white font-semibold py-2 rounded-md hover:bg-gray-900 transition-colors">
-                    Buy Now {book.price ? `(৳${book.price})` : ''}
-                </a>
-            </div>
-        </div>
-    );
-}
-
-
+/**
+ * ডায়নামিক শপ পেজ।
+ * URL-এর slug অনুযায়ী দোকানের তথ্য এবং বই প্রদর্শন করে।
+ * এই কম্পোনেন্টটি একটি সার্ভার কম্পোনেন্ট, যা দ্রুত ডেটা ফেচ করে।
+ */
 export default async function ShopPage({ params }) {
     const { slug } = params;
+
+    // সার্ভারে দোকানের সমস্ত ডেটা আনা হচ্ছে
     const shop = await getShopBySlug(slug);
 
+    // যদি দোকান খুঁজে না পাওয়া যায় (বা RLS পলিসি ডেটা ব্লক করে), তাহলে 404 পেজ দেখানো হবে
     if (!shop) {
         notFound();
     }
 
-    // এখানে shop অবজেক্ট থেকে isOwner, id, এবং allCategories বের করে আনা হচ্ছে
+    // ডেটা থেকে প্রয়োজনীয় ভ্যারিয়েবলগুলো বের করে আনা হচ্ছে
     const { name, booksByCategory, isOwner, id, allCategories } = shop;
     const hasBooks = Object.keys(booksByCategory).length > 0;
+    const hasCategories = allCategories && allCategories.length > 0;
 
     return (
         <main className="container mx-auto px-4 py-8">
@@ -50,25 +31,34 @@ export default async function ShopPage({ params }) {
                 <p className="text-lg text-gray-500 mt-2">"{name}" এর বইয়ের সংগ্রহ</p>
             </header>
 
+            {/* শুধুমাত্র দোকানের মালিকের জন্য ম্যানেজমেন্ট বাটন দেখানো হচ্ছে */}
             {isOwner && (
                 <div className="text-center mb-12">
-                    <Link
-                        href={{
-                            pathname: `/shop/${slug}/add-book`,
-                            query: {
-                                // সমাধান: এখানে shop.id ব্যবহার করা হয়েছে
-                                shopId: id,
-                                categories: JSON.stringify(allCategories)
-                            }
-                        }}
-                        className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-all duration-300 transform hover:scale-105"
-                    >
-                        + নতুন বই যোগ করুন
-                    </Link>
+                    {/* ক্যাটাগরি থাকলেই কেবল "নতুন বই যোগ করুন" বাটনটি দেখানো হবে */}
+                    {hasCategories ? (
+                        <Link
+                            href={{
+                                pathname: `/shop/${slug}/add-book`,
+                                query: {
+                                    shopId: id,
+                                    categories: JSON.stringify(allCategories)
+                                }
+                            }}
+                            className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-all duration-300 transform hover:scale-105"
+                        >
+                            + নতুন বই যোগ করুন
+                        </Link>
+                    ) : (
+                        // ক্যাটাগরি না থাকলে একটি তথ্যপূর্ণ বার্তা দেখানো হবে
+                        <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 max-w-lg mx-auto">
+                            <p className="font-bold">এখনো কোনো বই যোগ করা যাবে না।</p>
+                            <p>সাইটের অ্যাডমিন এখনো কোনো বইয়ের ক্যাটাগরি তৈরি করেননি।</p>
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* বাকি UI অপরিবর্তিত */}
+            {/* দোকানে বই আছে কি না, তার উপর ভিত্তি করে UI দেখানো হচ্ছে */}
             {!hasBooks ? (
                 <div className="text-center text-gray-500 py-16 bg-gray-50 rounded-lg">
                     <h3 className="text-2xl font-semibold text-gray-700">এখনো কোনো বই নেই</h3>
@@ -78,10 +68,18 @@ export default async function ShopPage({ params }) {
                 <div className="space-y-16">
                     {Object.entries(booksByCategory).map(([category, books]) => (
                         <section key={category}>
-                            <h2 className="text-3xl font-bold border-b-2 border-gray-200 pb-3 mb-8 text-gray-700">{category}</h2>
+                            <h2 className="text-3xl font-bold border-b-2 border-gray-200 pb-3 mb-8 text-gray-700">
+                                {category}
+                            </h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                                 {books.map((book) => (
-                                    <BookCard key={book.id} book={book} isOwner={isOwner} shopSlug={slug} />
+                                    // এখানে নতুন BookCard ক্লায়েন্ট কম্পোনেন্টটি ব্যবহার করা হচ্ছে
+                                    <BookCard
+                                        key={book.id}
+                                        book={book}
+                                        isOwner={isOwner}
+                                        shopSlug={slug}
+                                    />
                                 ))}
                             </div>
                         </section>

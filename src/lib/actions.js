@@ -148,3 +148,119 @@ export async function addBookToShop(previousState, formData) {
 
     return { success: true, slug: shopSlug };
 }
+
+/**
+ * একটি বিদ্যমান বইয়ের তথ্য আপডেট করার জন্য সার্ভার অ্যাকশন।
+ * @param {object} previousState - useActionState থেকে আসা স্টেট।
+ * @param {FormData} formData - ফর্ম থেকে আসা ডেটা।
+ * @returns {Promise<object>} - সফল বা ব্যর্থতার তথ্যসহ একটি অবজেক্ট।
+ */
+export async function updateBook(previousState, formData) {
+    const supabase = createClient();
+
+    // ১. ব্যবহারকারী লগইন করা আছে কি না, তা চেক করুন
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { error: 'বই আপডেট করার জন্য আপনাকে অবশ্যই লগইন করতে হবে।' };
+    }
+
+    // ২. ফর্ম থেকে সমস্ত ডেটা সংগ্রহ করুন
+    const bookId = formData.get('bookId');
+    const shopSlug = formData.get('shopSlug');
+    const title = formData.get('title');
+    const categoryId = formData.get('categoryId');
+    const affiliateUrl = formData.get('affiliateUrl');
+    const imageUrl = formData.get('imageUrl');
+    const shortDescription = formData.get('shortDescription');
+    const price = formData.get('price');
+
+    // ৩. বেসিক ভ্যালিডেশন
+    if (!bookId || !shopSlug || !title || !categoryId || !affiliateUrl) {
+        return { error: 'টাইটেল, ক্যাটাগরি এবং এফিলিয়েট লিঙ্ক আবশ্যক।' };
+    }
+
+    // ৪. নিরাপত্তা যাচাই: ব্যবহারকারী কি আসলেই এই বইটির মালিক?
+    // আমরা বইয়ের shop_id থেকে owner_id খুঁজে বের করে ব্যবহারকারীর id-এর সাথে মেলাব।
+    const { data: bookOwner, error: ownerError } = await supabase
+        .from('books')
+        .select('shops ( owner_id )')
+        .eq('id', bookId)
+        .single();
+
+    if (ownerError || !bookOwner || bookOwner.shops.owner_id !== user.id) {
+        return { error: 'এই বইটি সম্পাদনা করার অনুমতি আপনার নেই।' };
+    }
+
+    // ৫. ডাটাবেসে বইটি আপডেট করুন
+    const { error: updateError } = await supabase
+        .from('books')
+        .update({
+            title: title,
+            category_id: categoryId,
+            affiliate_url: affiliateUrl,
+            image_url: imageUrl,
+            short_description: shortDescription,
+            price: price || null,
+        })
+        .eq('id', bookId);
+
+    if (updateError) {
+        console.error('Error updating book:', updateError);
+        return { error: 'বই আপডেট করার সময় একটি সমস্যা হয়েছে।' };
+    }
+
+    // ৬. ক্যাশ রিভ্যালিডেট করুন এবং সফলতার তথ্য রিটার্ন করুন
+    revalidatePath(`/shop/${shopSlug}`);
+
+    // এখানে আমরা redirect ব্যবহার করতে পারি, কারণ এটি একটি সফল সমাপ্তি।
+    // তবে ক্লায়েন্ট-সাইড রিডাইরেকশন প্যাটার্নটি সামঞ্জস্যপূর্ণ।
+    return { success: true, slug: shopSlug };
+}
+/**
+ * একটি বই ডাটাবেস থেকে স্থায়ীভাবে মুছে ফেলার জন্য সার্ভার অ্যাকশন।
+ * @param {string} bookId - যে বইটি মোছা হবে তার UUID।
+ * @param {string} shopSlug - যে দোকানের পেজ রিভ্যালিডেট করতে হবে তার slug।
+ * @returns {Promise<object>} - সফল বা ব্যর্থতার তথ্যসহ একটি অবজেক্ট।
+ */
+export async function deleteBook(bookId, shopSlug) {
+    'use server'; // এটি একটি সার্ভার অ্যাকশন
+
+    if (!bookId || !shopSlug) {
+        return { error: 'অবৈধ অনুরোধ। বই বা দোকানের তথ্য পাওয়া যায়নি।' };
+    }
+
+    const supabase = createClient();
+
+    // ১. ব্যবহারকারী লগইন করা আছে কি না, তা চেক করুন
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { error: 'বই মোছার জন্য আপনাকে অবশ্যই লগইন করতে হবে।' };
+    }
+
+    // ২. নিরাপত্তা যাচাই: ব্যবহারকারী কি আসলেই এই বইটির মালিক?
+    const { data: bookOwner, error: ownerError } = await supabase
+        .from('books')
+        .select('shops ( owner_id )')
+        .eq('id', bookId)
+        .single();
+
+    if (ownerError || !bookOwner || bookOwner.shops.owner_id !== user.id) {
+        return { error: 'এই বইটি মোছার অনুমতি আপনার নেই।' };
+    }
+
+    // ৩. ডাটাবেস থেকে বইটি মুছে ফেলুন
+    const { error: deleteError } = await supabase
+        .from('books')
+        .delete()
+        .eq('id', bookId);
+
+    if (deleteError) {
+        console.error('Error deleting book:', deleteError);
+        return { error: 'বই মোছার সময় একটি সমস্যা হয়েছে।' };
+    }
+
+    // ৪. ক্যাশ রিভ্যালিডেট করুন যাতে পেজটি রিফ্রেশ হয়
+    revalidatePath(`/shop/${shopSlug}`);
+
+    return { success: 'বইটি সফলভাবে মুছে ফেলা হয়েছে।' };
+}
