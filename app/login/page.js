@@ -20,14 +20,16 @@ export default function LoginPage() {
                 // যদি ব্যবহারকারী আগে থেকেই লগইন করা থাকেন, তাহলে তাকে আর লগইন পেজ না দেখিয়ে
                 // সরাসরি হোমপেজে পাঠিয়ে দেওয়া হবে।
                 router.replace('/'); // .push() এর বদলে .replace() ব্যবহার করা ভালো, এতে ব্রাউজার হিস্ট্রিতে লগইন পেজটি থাকবে না。
+                router.refresh(); // ensure RootLayout re-renders with new session
             }
         };
 
         checkUserAndRedirect();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
             if (event === 'SIGNED_IN') {
-                router.replace('/');
+                router.replace('/'); // go home
+                router.refresh();     // re-render server components/layout now
             }
         });
 
