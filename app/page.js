@@ -22,7 +22,7 @@ export default async function HomePage() {
             <span className="h-px flex-1 bg-gray-200" />
           </div>
           <p className="mt-4 text-center text-gray-700 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-4 shadow-sm">
-            একাউন্ট খুলে নিজের প্রিয় বইগুলো সংগ্রহ করে  রাখুন।
+            একাউন্ট খুলে নিজের প্রিয় বইগুলো সংগ্রহ করে এফিলিয়েট মার্কেটিং করুন।
           </p>
         </div>
       </div>
