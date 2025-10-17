@@ -58,7 +58,7 @@ export default function CreateShopPage() {
           <form action={formAction} className="space-y-6">
             <div>
               <label htmlFor="shopName" className="block text-sm font-medium text-gray-700 mb-1">
-                দোকানের নাম
+                দোকানের নাম (English)
               </label>
               <input
                 type="text"
@@ -67,7 +67,7 @@ export default function CreateShopPage() {
                 required
                 minLength="3"
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="যেমন: আমার বই ঘর"
+                placeholder="Boi Bikreta Rahim / Boi Premi"
               />
             </div>
 

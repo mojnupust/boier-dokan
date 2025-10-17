@@ -21,7 +21,7 @@ export default async function EditBookPage({ params }) {
             <div className="max-w-3xl mx-auto">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">বইয়ের তথ্য সম্পাদনা করুন</h1>
-                    <p className="mt-3 text-lg text-gray-500">"{book.title}" বইটির তথ্য পরিবর্তন করুন।</p>
+                    <p className="mt-3 text-lg text-gray-500">&quot;{book.title}&quot; বইটির তথ্য পরিবর্তন করুন।</p>
                 </div>
 
                 <EditBookForm

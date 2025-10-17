@@ -1,5 +1,6 @@
 'use client'; // এই কম্পোনেন্টটি এখন একটি ক্লায়েন্ট কম্পোনেন্ট
 
+import Image from "next/image";
 import Link from "next/link";
 import { useTransition } from 'react';
 import { deleteBook } from "../../../src/lib/actions";
@@ -38,7 +39,7 @@ export default function BookCard({ book, isOwner, shopSlug }) {
                 </div>
             )}
             <div className="relative h-56 w-full">
-                <img src={book.image_url || 'https://via.placeholder.com/300x400.png?text=Boier+Dokan'} alt={book.title} className="w-full h-full object-cover" />
+                <Image src={book.image_url || 'https://via.placeholder.com/300x400.png?text=Boier+Dokan'} alt={book.title} className="w-full h-full object-cover" width={300} height={400} />
             </div>
             <div className="p-4 flex flex-col flex-grow">
                 <h3 className="font-bold text-lg truncate flex-grow-0">{book.title}</h3>

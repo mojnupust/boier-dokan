@@ -28,7 +28,7 @@ export default async function ShopPage({ params }) {
         <main className="container mx-auto px-4 py-8">
             <header className="text-center mb-12">
                 <h1 className="text-5xl font-extrabold capitalize text-gray-800">{name}</h1>
-                <p className="text-lg text-gray-500 mt-2">"{name}" এর বইয়ের সংগ্রহ</p>
+                <p className="text-lg text-gray-500 mt-2">&quot;{name}&quot; এর বইয়ের সংগ্রহ</p>
             </header>
 
             {/* শুধুমাত্র দোকানের মালিকের জন্য ম্যানেজমেন্ট বাটন দেখানো হচ্ছে */}

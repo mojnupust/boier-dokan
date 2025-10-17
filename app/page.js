@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getOfficialBooksGroupedByCategory } from "../src/lib/data";
 
 // পেজ কম্পোনেন্টকে async করা হয়েছে যাতে আমরা সার্ভারে ডেটা fetch করতে পারি।
@@ -31,10 +32,12 @@ export default async function HomePage() {
                     <div className="relative h-56">
                       {/* এখানে আমরা একটি প্লেসহোল্ডার ইমেজ ব্যবহার করছি। 
                            প্রজেক্টে আমরা next/image ব্যবহার করব */}
-                      <img
+                      <Image
                         src={book.image_url || 'https://via.placeholder.com/300x400.png?text=Boier+Dokan'}
                         alt={book.title}
                         className="w-full h-full object-cover"
+                        width={300}
+                        height={400}
                       />
                     </div>
                     <div className="p-4">
