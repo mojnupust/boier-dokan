@@ -13,6 +13,20 @@ export default async function HomePage() {
         <p className="text-lg text-gray-600 mt-2">আপনার পছন্দের বই খুঁজে নিন সেরা সংগ্রহ থেকে</p>
       </header>
 
+      {/* হেডারের পরে একটি সুন্দর ইনফো ব্লক */}
+      <div className="max-w-3xl mx-auto mb-10">
+        <div className="relative">
+          <div className="flex items-center gap-3 text-gray-500 select-none">
+            <span className="h-px flex-1 bg-gray-200" />
+            <span className="text-sm font-medium tracking-wider uppercase">অথবা</span>
+            <span className="h-px flex-1 bg-gray-200" />
+          </div>
+          <p className="mt-4 text-center text-gray-700 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            একাউন্ট খুলে নিজের প্রিয় বইগুলো সংগ্রহ করে  রাখুন।
+          </p>
+        </div>
+      </div>
+
       {/* যদি কোনো বই না থাকে বা ক্যাটাগরি না পাওয়া যায় */}
       {categoriesWithBooks.length === 0 ? (
         <div className="text-center text-gray-500">
