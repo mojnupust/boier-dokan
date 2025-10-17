@@ -58,7 +58,7 @@ export default function CreateShopPage() {
           <form action={formAction} className="space-y-6">
             <div>
               <label htmlFor="shopName" className="block text-sm font-medium text-gray-700 mb-1">
-                দোকানের নাম (English)
+                দোকানের নাম (English এ)
               </label>
               <input
                 type="text"
