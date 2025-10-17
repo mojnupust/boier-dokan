@@ -1,55 +1,7 @@
 import { unstable_noStore as noStore } from 'next/cache';
 import { createClient } from './supabase/server';
 
-export async function getOfficialBooksGroupedByCategory() {
-    // noStore() ব্যবহার করা হয়েছে যাতে ডেটা ক্যাশ না হয় এবং সবসময় নতুন ডেটা আসে।
-    // প্রোডাকশনে আপনি প্রয়োজন অনুযায়ী ক্যাশিং পলিসি পরিবর্তন করতে পারেন।
-    noStore();
-    const supabase = createClient();
-
-    // আমরা 'shops' টেবিল থেকে যে শপটির 'is_official' true, সেটিকে প্রথমে খুঁজে বের করব।
-    const { data: officialShop, error: shopError } = await supabase
-        .from('shops')
-        .select('id')
-        .eq('is_official', true)
-        .single(); // .single() ব্যবহার করা হয়েছে কারণ আমরা জানি একটি মাত্র অফিসিয়াল শপ থাকবে।
-
-    if (shopError || !officialShop) {
-        console.error('Error fetching official shop:', shopError);
-        return []; // যদি অফিসিয়াল শপ না পাওয়া যায়, তবে খালি অ্যারে রিটার্ন করবে।
-    }
-
-    // এখন আমরা ক্যাটাগরি এবং ঐ ক্যাটাগরির অধীনে থাকা বইগুলো আনব,
-    // তবে শুধুমাত্র অফিসিয়াল শপের বইগুলো।
-    const { data: categoriesWithBooks, error: booksError } = await supabase
-        .from('categories')
-        .select(`
-      id,
-      name,
-      slug,
-      books (
-        id,
-        title,
-        short_description,
-        image_url,
-        affiliate_url,
-        price
-      )
-    `)
-        .eq('books.shop_id', officialShop.id) // শুধুমাত্র অফিসিয়াল শপের বই ফিল্টার করা হচ্ছে।
-        .order('name', { ascending: true }) // ক্যাটাগরিগুলো নামের ভিত্তিতে সাজানো থাকবে।
-        .order('position', { foreignTable: 'books', ascending: true }); // বইগুলো তাদের পজিশন অনুযায়ী সাজানো থাকবে।
-
-    if (booksError) {
-        console.error('Error fetching categories and books:', booksError);
-        return [];
-    }
-
-    // যেসব ক্যাটাগরির অধীনে কোনো বই নেই, সেগুলো আমরা ফিল্টার করে বাদ দিয়ে দিব।
-    const filteredCategories = categoriesWithBooks.filter(category => category.books.length > 0);
-
-    return filteredCategories;
-}
+// দ্রষ্টব্য: getOfficialBooksGroupedByCategory এর পুরনো সংস্করণটি এখান থেকে মুছে ফেলা হয়েছে।
 
 export async function getUserShop() {
     noStore(); // ক্যাশিং বন্ধ রাখা হলো
@@ -74,8 +26,6 @@ export async function getUserShop() {
 
     return shop; // দোকান পাওয়া গেলে shop অবজেক্ট, না পাওয়া গেলে null রিটার্ন করবে
 }
-
-// getUserShop ফাংশনের নিচে এই কোড যোগ করুন
 
 /**
  * সকল ক্যাটাগরির একটি তালিকা নিয়ে আসে।
@@ -125,42 +75,103 @@ export async function getShopBySlug(slug) {
         return acc;
     }, {});
 
-    // সমাধান: এখানে allCategories প্রপার্টিটি যোগ করা হয়েছে
     return {
         id: shop.id,
         name: shop.name,
         slug: shop.slug,
         booksByCategory: booksByCategory,
         isOwner: user ? user.id === shop.owner_id : false,
-        allCategories: allCategories, // <-- এই লাইনটি যোগ করা হয়েছে
+        allCategories: allCategories,
     };
 }
 
 /**
  * সম্পাদনা করার জন্য একটি নির্দিষ্ট বইয়ের ডেটা এবং মালিকানা যাচাই করে।
- * @param {string} bookId - যে বইটি সম্পাদনা করা হবে তার UUID।
- * @returns {Promise<object|null>} - বইয়ের ডেটা অথবা null।
  */
 export async function getBookForEdit(bookId) {
     noStore();
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) return null; // লগইন না থাকলে null
+    if (!user) return null;
 
     const { data: book, error } = await supabase
         .from('books')
-        .select(`
-      *,
-      shops ( owner_id )
-    `)
+        .select(`*, shops ( owner_id )`)
         .eq('id', bookId)
         .single();
 
-    // যদি বই না পাওয়া যায় বা ব্যবহারকারী মালিক না হন, তাহলে null রিটার্ন করুন
     if (error || !book || book.shops.owner_id !== user.id) {
         return null;
     }
 
     return book;
+}
+
+export async function getCurrentUserData() {
+    noStore();
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { user: null, profile: null, shop: null, adminShop: null };
+    }
+
+    const [profileRes, shopRes] = await Promise.all([
+        supabase.from('profiles').select('role, display_name').eq('id', user.id).single(),
+        supabase.from('shops').select('id, name, slug').eq('owner_id', user.id).single()
+    ]);
+
+    const profile = profileRes.data;
+    const userShop = shopRes.data;
+
+    let adminShop = null;
+    if (profile?.role === 'admin') {
+        const { data: officialShop } = await supabase
+            .from('shops')
+            .select('id, name, slug')
+            .eq('slug', 'official')
+            .single();
+        adminShop = officialShop;
+    }
+
+    return { user, profile, shop: userShop, adminShop };
+}
+
+// getOfficialBooksGroupedByCategory এর সঠিক এবং চূড়ান্ত সংস্করণ
+export async function getOfficialBooksGroupedByCategory() {
+    noStore();
+    const supabase = createClient();
+
+    const { data: officialShop } = await supabase
+        .from('shops')
+        .select('id, slug')
+        .eq('slug', 'official')
+        .single();
+
+    if (!officialShop) {
+        return { booksByCategory: {}, shop: null };
+    }
+
+    const { data: books, error: booksError } = await supabase
+        .from('books')
+        .select('*, categories (name)')
+        .eq('shop_id', officialShop.id)
+        .order('created_at', { ascending: false });
+
+    if (booksError) {
+        console.error('Error fetching books for official shop:', booksError);
+        return { booksByCategory: {}, shop: officialShop };
+    }
+
+    const booksByCategory = books.reduce((acc, book) => {
+        const categoryName = book.categories?.name || 'Uncategorized';
+        if (!acc[categoryName]) {
+            acc[categoryName] = [];
+        }
+        acc[categoryName].push(book);
+        return acc;
+    }, {});
+
+    return { booksByCategory, shop: officialShop };
 }
