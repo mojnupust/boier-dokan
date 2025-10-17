@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getShopBySlug } from "../../../src/lib/data";
 import BookCard from "./BookCard"; // BookCard.js ফাইল থেকে কম্পোনেন্ট ইম্পোর্ট করা হচ্ছে
+import CopyLinkButton from "./CopyLinkButton";
 
 /**
  * ডায়নামিক শপ পেজ।
@@ -36,18 +37,21 @@ export default async function ShopPage({ params }) {
                 <div className="text-center mb-12">
                     {/* ক্যাটাগরি থাকলেই কেবল "নতুন বই যোগ করুন" বাটনটি দেখানো হবে */}
                     {hasCategories ? (
-                        <Link
-                            href={{
-                                pathname: `/shop/${slug}/add-book`,
-                                query: {
-                                    shopId: id,
-                                    categories: JSON.stringify(allCategories)
-                                }
-                            }}
-                            className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-all duration-300 transform hover:scale-105"
-                        >
-                            + নতুন বই যোগ করুন
-                        </Link>
+                        <div className="flex items-center justify-center gap-3 flex-wrap">
+                            <Link
+                                href={{
+                                    pathname: `/shop/${slug}/add-book`,
+                                    query: {
+                                        shopId: id,
+                                        categories: JSON.stringify(allCategories)
+                                    }
+                                }}
+                                className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-all duration-300 transform hover:scale-105"
+                            >
+                                + নতুন বই যোগ করুন
+                            </Link>
+                            <CopyLinkButton slug={slug} />
+                        </div>
                     ) : (
                         // ক্যাটাগরি না থাকলে একটি তথ্যপূর্ণ বার্তা দেখানো হবে
                         <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 max-w-lg mx-auto">
