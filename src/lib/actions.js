@@ -264,3 +264,54 @@ export async function deleteBook(bookId, shopSlug) {
 
     return { success: 'বইটি সফলভাবে মুছে ফেলা হয়েছে।' };
 }
+
+// একটি টেক্সটকে URL-ফ্রেন্ডলি স্ল্যাগে পরিণত করার জন্য Helper ফাংশন
+function categorySlugify(text) {
+    if (!text) return '';
+    return text.toString().toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-')
+        .replace(/^-+/, '')
+        .replace(/-+$/, '');
+}
+
+/**
+ * একটি নতুন ক্যাটাগরি তৈরি করার জন্য সার্ভার অ্যাকশন।
+ * @param {string} categoryName - নতুন ক্যাটাগরির নাম।
+ * @returns {Promise<object>} - সফল হলে নতুন ক্যাটাগরির তথ্য, না হলে এরর।
+ */
+export async function createCategory(categoryName) {
+    'use server';
+
+    if (!categoryName || categoryName.trim().length < 2) {
+        return { error: 'ক্যাটাগরির নাম কমপক্ষে ২ অক্ষরের হতে হবে।' };
+    }
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { error: 'ক্যাটাগরি তৈরি করার জন্য আপনাকে লগইন করতে হবে।' };
+    }
+
+    const name = categoryName.trim();
+    const slug = categorySlugify(name);
+
+    const { data: newCategory, error } = await supabase
+        .from('categories')
+        .insert({ name, slug })
+        .select()
+        .single();
+
+    if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+            return { error: 'এই নামের ক্যাটাগরি ইতোমধ্যে বিদ্যমান।' };
+        }
+        console.error("Error creating category:", error);
+        return { error: 'ক্যাটাগরি তৈরিতে একটি সমস্যা হয়েছে।' };
+    }
+
+    // সফল হলে নতুন ক্যাটাগরির সম্পূর্ণ অবজেক্টটি রিটার্ন করা হচ্ছে
+    return { success: true, newCategory };
+}

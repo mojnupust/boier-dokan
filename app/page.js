@@ -9,7 +9,7 @@ export default async function HomePage() {
   return (
     <main className="container mx-auto px-4 py-8">
       <header className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-800">বইয়ের দোকান</h1>
+        <h1 className="text-4xl font-bold text-gray-800">Boi Collector .com</h1>
         <p className="text-lg text-gray-600 mt-2">আপনার পছন্দের বই খুঁজে নিন সেরা সংগ্রহ থেকে</p>
       </header>
 

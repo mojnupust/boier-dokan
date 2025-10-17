@@ -7,8 +7,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "বইয়ের দোকান",
-  description: "আপনার নিজের বইয়ের দোকান তৈরি করুন এবং শেয়ার করুন",
+  title: "Boi Collector .com",
+  description: "Boi Collector .com আপনার নিজের বইয়ের দোকান তৈরি করুন এবং শেয়ার করুন",
 };
 
 function LogoutButton() {
@@ -49,7 +49,7 @@ export default async function RootLayout({ children }) {
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center py-4">
               <Link href="/" className="text-2xl font-bold text-gray-800">
-                বইয়ের দোকান
+                Boi Collector .com
               </Link>
               <div className="flex items-center space-x-4">
                 {user ? (
