@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ShopList from "../src/components/ShopList";
+import HomeIntro from "../src/components/HomeIntro";
 import { getAllCategories, getAllShop, getCurrentUserData, getOfficialBooksGroupedByCategory } from "../src/lib/data";
 import BookCard from "./shop/[slug]/BookCard";
 // নতুন সার্ভার অ্যাকশনটি ইম্পোর্ট করা হচ্ছে
@@ -46,17 +47,7 @@ export default async function HomePage() {
         </h1>
         <p className="text-lg text-gray-500 mt-2">
           {isAdmin ? 'এখান থেকে অফিসিয়াল দোকানের বই ম্যানেজ করুন' : <div className="max-w-3xl mx-auto">
-            <p className="text-center text-xl text-gray-600">
-              জনপ্রিয় বইয়ের দোকানগুলো থেকে বাছাই করা সেরা বইয়ের সংগ্রহ।
-            </p>
-            <div className="flex items-center my-4">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="flex-shrink mx-4 text-gray-500 font-medium">অথবা</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-            <p className="text-lg text-gray-600">
-              একাউন্ট খুলে নিজের প্রিয় বইগুলো সংগ্রহ করুন, যাতে করে ভবিষ্যতে বইগুলো পড়তে পারেন। প্রয়োজনে আপনার বইসংগ্রহের লিংক সবার সাথে শেয়ার করুন।
-            </p>
+            <HomeIntro/>
           </div>}
         </p>
       </header>
