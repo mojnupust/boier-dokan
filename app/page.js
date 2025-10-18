@@ -45,7 +45,19 @@ export default async function HomePage() {
           {isAdmin ? 'অ্যাডমিন কন্ট্রোল প্যানেল' : 'সর্বশেষ প্রকাশিত বই'}
         </h1>
         <p className="text-lg text-gray-500 mt-2">
-          {isAdmin ? 'এখান থেকে অফিসিয়াল দোকানের বই ম্যানেজ করুন' : 'জনপ্রিয় বইয়ের দোকানগুলো থেকে বাছাই করা সেরা বইয়ের সংগ্রহ'}
+          {isAdmin ? 'এখান থেকে অফিসিয়াল দোকানের বই ম্যানেজ করুন' : <div className="max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600">
+              জনপ্রিয় বইয়ের দোকানগুলো থেকে বাছাই করা সেরা বইয়ের সংগ্রহ।
+            </p>
+            <div className="flex items-center my-4">
+              <div className="flex-grow border-t border-gray-300"></div>
+              <span className="flex-shrink mx-4 text-gray-500 font-medium">অথবা</span>
+              <div className="flex-grow border-t border-gray-300"></div>
+            </div>
+            <p className="text-lg text-gray-600">
+              একাউন্ট খুলে নিজের প্রিয় বইগুলো সংগ্রহ করুন এবং আপনার দোকানের লিংক শেয়ার করে এফিলিয়েট মার্কেটিং করুন।
+            </p>
+          </div>}
         </p>
       </header>
 
