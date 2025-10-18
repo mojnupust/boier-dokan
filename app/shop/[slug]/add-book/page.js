@@ -153,23 +153,23 @@ export default function AddBookPage({ params }) {
                             </div>
                             {/* ... (মূল্য এবং অন্যান্য ফিল্ড অপরিবর্তিত) ... */}
                             <div>
-                                <label htmlFor="price" className="block text-lg font-semibold text-gray-800">মূল্য (اختیاری)</label>
+                                <label htmlFor="price" className="block text-lg font-semibold text-gray-800">মূল্য (Price)</label>
                                 <input type="number" name="price" id="price" step="0.01" className={inputStyle} placeholder="৳ 250.00" />
                             </div>
                         </div>
 
                         <div>
-                            <label htmlFor="affiliateUrl" className="block text-lg font-semibold text-gray-800">এফিলিয়েট লিঙ্ক <span className="text-red-500">*</span></label>
+                            <label htmlFor="affiliateUrl" className="block text-lg font-semibold text-gray-800">এফিলিয়েট লিঙ্ক (ইনপুট না দিলেও সমস্যা নাই) <span className="text-red-500">*</span></label>
                             <input type="url" name="affiliateUrl" id="affiliateUrl" className={inputStyle} placeholder="https://www.rokomari.com/book/..." />
                         </div>
 
                         <div>
-                            <label htmlFor="imageUrl" className="block text-lg font-semibold text-gray-800">ছবির লিঙ্ক (اختیاری)</label>
+                            <label htmlFor="imageUrl" className="block text-lg font-semibold text-gray-800">ছবির লিঙ্ক (ইনপুট না দিলেও সমস্যা নাই)</label>
                             <input type="url" name="imageUrl" id="imageUrl" className={inputStyle} placeholder="https://images.rokomari.com/..." />
                         </div>
 
                         <div>
-                            <label htmlFor="shortDescription" className="block text-lg font-semibold text-gray-800">সংক্ষিপ্ত বর্ণনা (اختیاری)</label>
+                            <label htmlFor="shortDescription" className="block text-lg font-semibold text-gray-800">সংক্ষিপ্ত বর্ণনা (ইনপুট না দিলেও সমস্যা নাই)</label>
                             <textarea name="shortDescription" id="shortDescription" rows="4" className={inputStyle} placeholder="বইটি সম্পর্কে কিছু আকর্ষণীয় তথ্য দিন..."></textarea>
                         </div>
 
