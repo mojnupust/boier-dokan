@@ -42,7 +42,7 @@ export default async function HomePage() {
     <div className="container mx-auto px-4 py-8">
       <header className="text-center mb-12">
         <h1 className="text-5xl font-extrabold text-gray-800">
-          {isAdmin ? 'অ্যাডমিন কন্ট্রোল প্যানেল' : 'সর্বশেষ প্রকাশিত বই'}
+          {isAdmin ? 'অ্যাডমিন কন্ট্রোল প্যানেল' : 'জনপ্রিয় বইসমূহ'}
         </h1>
         <p className="text-lg text-gray-500 mt-2">
           {isAdmin ? 'এখান থেকে অফিসিয়াল দোকানের বই ম্যানেজ করুন' : <div className="max-w-3xl mx-auto">
