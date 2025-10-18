@@ -10,11 +10,7 @@ export default function HomeIntro() {
             <span className="absolute -top-10 left-0 md:-left-4 text-8xl md:text-9xl font-serif text-gray-100 -z-0" aria-hidden="true">
               “
             </span>
-            <blockquote className="relative">
-              <p className="text-3xl md:text-4xl font-serif text-gray-800 leading-relaxed">
-                জনপ্রিয় বইয়ের দোকানগুলো থেকে বাছাই করা সেরা বইয়ের সংগ্রহ।
-              </p>
-            </blockquote>
+
           </div>
 
           {/* --- বিভাজক --- */}
@@ -30,11 +26,11 @@ export default function HomeIntro() {
               আপনার নিজের বইয়ের জগৎ তৈরি করুন
             </h3>
             <p className="text-lg text-gray-600 leading-8">
-              একাউন্ট খুলে নিজের প্রিয় বইগুলো সংগ্রহ করুন, যাতে করে ভবিষ্যতে বইগুলো পড়তে পারেন। প্রয়োজনে আপনার বইসংগ্রহের লিংক সবার সাথে শেয়ার করুন। আমাদের প্লাটফর্ম ব্যবহার করে এফিলিয়েট মার্কেটিং করতেও পারবেন। 
+              একাউন্ট খুলে নিজের প্রিয় বইগুলো সংগ্রহ করুন, যাতে করে ভবিষ্যতে বইগুলো পড়তে পারেন। প্রয়োজনে আপনার বইসংগ্রহের লিংক সবার সাথে শেয়ার করুন। আমাদের প্লাটফর্ম ব্যবহার করে এফিলিয়েট মার্কেটিং করতেও পারবেন।
             </p>
             <div className="mt-8">
-              <a 
-                href="/login" 
+              <a
+                href="/login"
                 className="inline-block px-10 py-3 bg-blue-600 text-white font-bold rounded-md shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105"
               >
                 শুরু করুন

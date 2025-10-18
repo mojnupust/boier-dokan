@@ -1,6 +1,6 @@
 import Link from "next/link";
-import ShopList from "../src/components/ShopList";
 import HomeIntro from "../src/components/HomeIntro";
+import ShopList from "../src/components/ShopList";
 import { getAllCategories, getAllShop, getCurrentUserData, getOfficialBooksGroupedByCategory } from "../src/lib/data";
 import BookCard from "./shop/[slug]/BookCard";
 // নতুন সার্ভার অ্যাকশনটি ইম্পোর্ট করা হচ্ছে
@@ -40,18 +40,23 @@ export default async function HomePage() {
 
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <header className="mb-12">
-        <h1 className="text-5xl font-extrabold text-gray-800">
-          {isAdmin && 'অ্যাডমিন কন্ট্রোল প্যানেল'}
+    <div className="container mx-auto px-4 py-8 sm:py-12">
+      {/* --- Header Section --- */}
+      <header className="text-center mb-16">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight">
+          {isAdmin ? 'অ্যাডমিন কন্ট্রোল প্যানেল' : 'Boi Collector'}
         </h1>
-        <p className="text-lg text-gray-500 mt-2">
-          {isAdmin ? 'এখান থেকে অফিসিয়াল দোকানের বই ম্যানেজ করুন' : <div className="max-w-3xl mx-auto">
-            <HomeIntro/>
-          </div>}
+        <p className="mt-4 max-w-2xl mx-auto text-lg sm:text-xl text-gray-600">
+          {isAdmin ? 'এখান থেকে অফিসিয়াল দোকানের বই ম্যানেজ করুন' : 'জনপ্রিয় বইয়ের দোকানগুলো থেকে বাছাই করা সেরা বইয়ের সংগ্রহ।'}
         </p>
+        {!isAdmin && (
+          <div className="mt-8 max-w-lg mx-auto">
+            <HomeIntro />
+          </div>
+        )}
       </header>
 
+      {/* --- Admin "Add Book" Button --- */}
       {isAdmin && officialShop && (
         <div className="text-center mb-12">
           <Link
@@ -59,30 +64,30 @@ export default async function HomePage() {
               pathname: `/shop/${officialShop.slug}/add-book`,
               query: { shopId: officialShop.id, categories: JSON.stringify(categories) }
             }}
-            className="mt-8 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700"
+            className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-transform hover:scale-105"
           >
             + নতুন বই যোগ করুন
           </Link>
         </div>
       )}
 
-      {!isAdmin &&
-        <div>
+      {/* --- Shops Section (Trusted Partners) --- */}
+      {!isAdmin && shops && shops.length > 0 && (
+        <section className="mb-16">
           <h2 className="text-center text-3xl font-bold text-gray-800 mb-10 relative pb-2">
             Our Trusted Partners
             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-blue-500 rounded-full"></span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-            {shops?.map((shop) => <ShopList key={shop.id} shop={shop} />)}
+            {shops.map((shop) => <ShopList key={shop.id} shop={shop} />)}
           </div>
-        </div>
+        </section>
+      )}
 
-
-      }
-
+      {/* --- Books Section --- */}
       {!hasBooks ? (
         <div className="text-center text-gray-500 py-16">
-          <p>এডমিন কোনো বই যোগ করেননি।</p>
+          <p>এখনও কোনো বই যোগ করা হয়নি।</p>
         </div>
       ) : (
         <div className="space-y-16">
