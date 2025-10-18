@@ -1,7 +1,7 @@
 export default function HomeIntro() {
   return (
     <div className="bg-white font-sans">
-      <div className="container mx-auto px-4 py-20 md:py-28">
+      <div className="container mx-auto px-4 py-6 md:py-6">
         <div className="max-w-4xl mx-auto text-center">
 
           {/* --- প্রথম অংশ: ট্যাগলাইন/উদ্ধৃতি --- */}
