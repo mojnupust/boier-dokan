@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getAllCategories, getCurrentUserData, getOfficialBooksGroupedByCategory } from "../src/lib/data";
+import ShopList from "../src/components/ShopList";
+import { getAllCategories, getAllShop, getCurrentUserData, getOfficialBooksGroupedByCategory } from "../src/lib/data";
 import BookCard from "./shop/[slug]/BookCard";
 // নতুন সার্ভার অ্যাকশনটি ইম্পোর্ট করা হচ্ছে
 import { createOfficialShop } from "../src/lib/actions";
@@ -7,10 +8,11 @@ import { createOfficialShop } from "../src/lib/actions";
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [{ user, profile }, booksData, categories] = await Promise.all([
+  const [{ user, profile }, booksData, categories, shops] = await Promise.all([
     getCurrentUserData(),
     getOfficialBooksGroupedByCategory(),
-    getAllCategories()
+    getAllCategories(),
+    getAllShop()
   ]);
 
   const isAdmin = profile?.role === 'admin';
@@ -23,7 +25,7 @@ export default async function HomePage() {
     return (
       <div className="container mx-auto text-center py-20">
         <h1 className="text-3xl font-bold">অ্যাডমিন সেটআপ</h1>
-  <p className="text-lg text-gray-600 mt-2">সিস্টেমের জন্য কোনো &ldquo;Official Shop&rdquo; পাওয়া যায়নি।</p>
+        <p className="text-lg text-gray-600 mt-2">সিস্টেমের জন্য কোনো &ldquo;Official Shop&rdquo; পাওয়া যায়নি।</p>
         <p className="mt-1">শুরু করার জন্য অনুগ্রহ করে অফিসিয়াল শপ তৈরি করুন।</p>
         <form action={createOfficialShop} className="mt-8">
           <button type="submit" className="px-8 py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-transform transform hover:scale-105">
@@ -34,6 +36,7 @@ export default async function HomePage() {
     );
   }
   // --- অ্যাডমিন লজিক শেষ ---
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -53,16 +56,30 @@ export default async function HomePage() {
               pathname: `/shop/${officialShop.slug}/add-book`,
               query: { shopId: officialShop.id, categories: JSON.stringify(categories) }
             }}
-            className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700"
+            className="mt-8 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700"
           >
             + নতুন বই যোগ করুন
           </Link>
         </div>
       )}
 
+      {!isAdmin &&
+        <div>
+          <h2 className="text-center text-3xl font-bold text-gray-800 mb-10 relative pb-2">
+            Our Trusted Partners
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-blue-500 rounded-full"></span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+            {shops?.map((shop) => <ShopList key={shop.id} shop={shop} />)}
+          </div>
+        </div>
+
+
+      }
+
       {!hasBooks ? (
         <div className="text-center text-gray-500 py-16">
-          <p>এখনো কোনো বই যোগ করা হয়নি।</p>
+          <p>এডমিন কোনো বই যোগ করেননি।</p>
         </div>
       ) : (
         <div className="space-y-16">

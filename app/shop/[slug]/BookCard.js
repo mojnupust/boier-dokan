@@ -44,9 +44,9 @@ export default function BookCard({ book, isOwner, shopSlug }) {
             <div className="p-4 flex flex-col flex-grow">
                 <h3 className="font-bold text-lg truncate flex-grow-0">{book.title}</h3>
                 <p className="text-gray-600 text-sm mt-1 h-10 overflow-hidden flex-grow">{book.short_description || 'No description'}</p>
-                <a href={book.affiliate_url} target="_blank" rel="noopener noreferrer" className="mt-4 w-full inline-block text-center bg-gray-800 text-white font-semibold py-2 rounded-md hover:bg-gray-900 transition-colors">
+                {book?.affiliate_url && <a href={book.affiliate_url} target="_blank" rel="noopener noreferrer" className="mt-4 w-full inline-block text-center bg-gray-800 text-white font-semibold py-2 rounded-md hover:bg-gray-900 transition-colors">
                     Buy Now {book.price ? `(৳${book.price})` : ''}
-                </a>
+                </a>}
             </div>
         </div>
     );

@@ -175,3 +175,19 @@ export async function getOfficialBooksGroupedByCategory() {
 
     return { booksByCategory, shop: officialShop };
 }
+
+export async function getAllShop() {
+    noStore(); // ক্যাশিং বন্ধ রাখা হলো
+    const supabase = createClient();
+
+    const { data: shops, error } = await supabase
+        .from('shops')
+        .select('name, slug')
+
+    if (error && error.code !== 'PGRST116') {
+        // PGRST116 মানে হলো কোনো row পাওয়া যায়নি, যা এক্ষেত্রে একটি এরর নয়।
+        console.error('Error fetching shop:', error);
+    }
+
+    return shops; // দোকান পাওয়া গেলে shop অবজেক্ট, না পাওয়া গেলে null রিটার্ন করবে
+}

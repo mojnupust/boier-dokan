@@ -160,7 +160,7 @@ export default function AddBookPage({ params }) {
 
                         <div>
                             <label htmlFor="affiliateUrl" className="block text-lg font-semibold text-gray-800">এফিলিয়েট লিঙ্ক <span className="text-red-500">*</span></label>
-                            <input type="url" name="affiliateUrl" id="affiliateUrl" required className={inputStyle} placeholder="https://www.rokomari.com/book/..." />
+                            <input type="url" name="affiliateUrl" id="affiliateUrl" className={inputStyle} placeholder="https://www.rokomari.com/book/..." />
                         </div>
 
                         <div>
